@@ -1,0 +1,150 @@
+//eventlistener for 10marks unit-1
+// Event listener for subjectSelec111111 change
+document.getElementById('subjectSelect').addEventListener('change', function () {
+    const selectedSubject = this.value;
+
+    // Fetch collections based on the selected subject
+    fetch(`/get_collections?subject=${selectedSubject}`)
+        .then(response => response.json())
+        .then(collections => {
+            const collectionSelect6 = document.getElementById('collectionname6');
+            collectionSelect6.innerHTML = '<option value="" disabled selected>Select Collection</option>';
+
+            // Add fetched collections to the select box
+            collections.forEach(collection => {
+                const option = document.createElement('option');
+                option.value = collection;
+                option.textContent = collection;
+                collectionSelect6.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching collections:', error));
+
+    // Trigger the change event for the collectionname dropdown
+    const event = new Event('change');
+    collectionSelect6.dispatchEvent(event);
+});
+// Event listener for collectionname5 change
+document.getElementById('collectionname6').addEventListener('change', function () {
+    const selectedSubject = document.getElementById('subjectSelect').value;
+    const selectedCollection = document.getElementById('collectionname6').value;
+
+    // Fetch documents from the selected collection
+    fetch(`/get_documents?subject=${selectedSubject}&collection=${selectedCollection}`)
+        .then(response => response.json())
+        .then(document_fields => {
+            console.log('Document Fields:', document_fields);
+            const questionSelect6 = document.getElementById('questionSelect6');
+            questionSelect6.innerHTML = '<option value="" disabled selected>Select Document</option>';
+
+            // Add fetched document fields to the select box
+            document_fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field;  // Use the appropriate field from your document
+                option.textContent = field;  // Use the appropriate field from your document
+                questionSelect6.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching documents:', error));
+});
+//unit one ka second choice yeh
+//eventlistener for 10marks unit-1
+// Event listener for subjectSelec111111 change
+document.getElementById('subjectSelect').addEventListener('change', function () {
+    const selectedSubject = this.value;
+
+    // Fetch collections based on the selected subject
+    fetch(`/get_collections?subject=${selectedSubject}`)
+        .then(response => response.json())
+        .then(collections => {
+            const collectionSelect7 = document.getElementById('collectionname7');
+            collectionSelect7.innerHTML = '<option value="" disabled selected>Select Collection</option>';
+
+            // Add fetched collections to the select box
+            collections.forEach(collection => {
+                const option = document.createElement('option');
+                option.value = collection;
+                option.textContent = collection;
+                collectionSelect7.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching collections:', error));
+
+    // Trigger the change event for the collectionname dropdown
+    const event = new Event('change');
+    collectionSelect7.dispatchEvent(event);
+});
+// Event listener for collectionname5 change
+document.getElementById('collectionname7').addEventListener('change', function () {
+    const selectedSubject = document.getElementById('subjectSelect').value;
+    const selectedCollection = document.getElementById('collectionname7').value;
+
+    // Fetch documents from the selected collection
+    fetch(`/get_documents?subject=${selectedSubject}&collection=${selectedCollection}`)
+        .then(response => response.json())
+        .then(document_fields => {
+            console.log('Document Fields:', document_fields);
+            const questionSelect7 = document.getElementById('questionSelect7');
+            questionSelect7.innerHTML = '<option value="" disabled selected>Select Document</option>';
+
+            // Add fetched document fields to the select box
+            document_fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field;  // Use the appropriate field from your document
+                option.textContent = field;  // Use the appropriate field from your document
+                questionSelect7.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching documents:', error));
+});
+//10marks unit-2
+document.getElementById('subjectSelect').addEventListener('change', function () {
+    const selectedSubject = this.value;
+
+    // Fetch collections based on the selected subject
+    fetch(`/get_collections?subject=${selectedSubject}`)
+        .then(response => response.json())
+        .then(collections => {
+            const collectionSelect8 = document.getElementById('collectionname8');
+            collectionSelect8.innerHTML = '<option value="" disabled selected>Select Collection</option>';
+
+            // Add fetched collections to the select box
+            collections.forEach(collection => {
+                const option = document.createElement('option');
+                option.value = collection;
+                option.textContent = collection;
+                collectionSelect8.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching collections:', error));
+
+    // Trigger the change event for the collectionname dropdown
+    const event = new Event('change');
+    collectionSelect8.dispatchEvent(event);
+});
+// Event listener for collectionname5 change
+document.getElementById('collectionname8').addEventListener('change', function () {
+    const selectedSubject = document.getElementById('subjectSelect').value;
+    const selectedCollection = document.getElementById('collectionname8').value;
+
+    // Fetch documents from the selected collection
+    fetch(`/get_documents?subject=${selectedSubject}&collection=${selectedCollection}`)
+        .then(response => response.json())
+        .then(document_fields => {
+            console.log('Document Fields:', document_fields);
+            const questionSelect8 = document.getElementById('questionSelect8');
+            questionSelect8.innerHTML = '<option value="" disabled selected>Select Document</option>';
+
+            // Add fetched document fields to the select box
+            document_fields.forEach(field => {
+                const option = document.createElement('option');
+                option.value = field;  // Use the appropriate field from your document
+                option.textContent = field;  // Use the appropriate field from your document
+                questionSelect8.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching documents:', error));
+});
+                    // yah pe end
+                
+        

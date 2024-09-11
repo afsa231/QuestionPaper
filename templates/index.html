@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapping Page</title>
+</head>
+<body>
+    <label for="collection">Select a collection:</label>
+    <select id="collection">
+        <!-- Options will be dynamically populated here -->
+    </select>
+    <br><br>
+    <label>Select databases:</label>
+    <div id="databaseList">
+        <!-- Checkboxes will be dynamically populated here -->
+    </div>
+    <button onclick="saveMapping()">Save Mapping</button>
+    <script>
+        // Fetch collections
+        fetch('/yearcollections')
+            .then(response => response.json())
+            .then(data => {
+                const selectCollection = document.getElementById('collection');
+                data.forEach(collection => {
+                    const option = document.createElement('option');
+                    option.value = collection;
+                    option.textContent = collection;
+                    selectCollection.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching collections:', error));
+
+        // Fetch databases
+        fetch('/attachdatabases')
+            .then(response => response.json())
+            .then(data => {
+                const databaseList = document.getElementById('databaseList');
+                data.forEach(database => {
+                    const input = document.createElement('input');
+                    input.type = 'checkbox';
+                    input.id = database;
+                    input.value = database;
+                    const label = document.createElement('label');
+                    label.htmlFor = database;
+                    label.textContent = database;
+                    databaseList.appendChild(input);
+                    databaseList.appendChild(label);
+                    databaseList.appendChild(document.createElement('br'));
+                });
+            })
+            .catch(error => console.error('Error fetching databases:', error));
+
+        function saveMapping() {
+            const selectedDatabases = [];
+            const selectedCollection = document.getElementById('collection').value;
+
+            // Collect selected databases
+            document.querySelectorAll('#databaseList input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedDatabases.push(checkbox.value);
+            });
+
+            // Send data to backend to handle database mapping
+            const data = {
+                databases: selectedDatabases,
+                collection: selectedCollection
+            };
+
+            // Example: Send data to backend using fetch API
+    fetch('/save-mapping', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Mapping saved successfully, provide feedback to user
+            alert('Mapping saved successfully!');
+            // Reload the page
+            window.location.reload();
+        } else {
+            // Handle errors if any
+            alert(`Failed to save mapping. ${result.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving mapping:', error);
+        alert('An error occurred while saving mapping');
+    });
+        }
+    </script>
+</body>
+</html>

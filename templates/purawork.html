@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--iocn link-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css"
+          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+          crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js"
+            integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/js/bootstrap.min.js"
+            integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+            crossorigin="anonymous"></script>
+            <style>
+                /* Add style to make selected text uppercase in the dropdown */
+                #collegeNameSelect {
+                    text-transform: uppercase;
+                }
+                #statusselect{
+                    text-transform: uppercase;
+                }
+                .input_fields_wrap3 > li:not(:first-child) {
+                    margin-top: 10px; /* Adjust the margin as needed */
+                }
+                input[type="checkbox"] {
+                    margin-right: 5px; /* Adjust as needed */
+                }
+
+                label {
+                    display: inline-block;
+                    margin-right: 10px;
+                }
+            </style>
+        
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Fetch data for the first select tag
+                    fetch('/get_collagenames')
+                        .then(response => response.json())
+                        .then(data => {
+                            const collegeNameSelect = document.getElementById('collegeNameSelect');
+                            data.forEach(name => {
+                                const option = document.createElement('option');
+                                option.value = name;
+                                option.textContent = name;
+                                collegeNameSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching collagenames:', error));
+        
+                    // Branch names
+                    fetch('/get_branchnames')
+                        .then(response => response.json())
+                        .then(data => {
+                            const branchNameSelect = document.getElementById('BranchNameSelect');
+                            data.forEach(name => {
+                                const option = document.createElement('option');
+                                option.value = name;
+                                option.textContent = name;
+                                branchNameSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching branchnames:', error));
+        
+                    // Fetch data for the years select tag
+                    fetch('/get_years')
+                        .then(response => response.json())
+                        .then(data => {
+                            const yearSelect = document.getElementById('yearSelect');
+                            data.forEach(year => {
+                                const option = document.createElement('option');
+                                option.value = year;
+                                option.textContent = year;
+                                yearSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching years:', error));
+        
+                    // Event listener for yearSelect change
+                    document.getElementById('yearSelect').addEventListener('change', function () {
+                        const selectedYear = this.value;
+                        fetch('/get_subjects?year=' + selectedYear)
+                            .then(response => response.json())
+                            .then(data => {
+                                const subjectSelect = document.getElementById('subjectSelect');
+                                subjectSelect.innerHTML = '<option value="" disabled selected>Subject Name</option>';
+                                data.forEach(subject => {
+                                    const option = document.createElement('option');
+                                    option.value = subject;
+                                    option.textContent = subject;
+                                    subjectSelect.appendChild(option);
+                                });
+                            })
+                            .catch(error => console.error('Error fetching subjects:', error));
+                    });
+        
+                    // Event listener for subjectSelect change
+                    document.getElementById('subjectSelect').addEventListener('change', function () {
+                        const selectedSubject = this.value;
+        
+                        // Fetch collections based on the selected subject
+                        fetch(`/get_collections?subject=${selectedSubject}`)
+                            .then(response => response.json())
+                            .then(collections => {
+                                const collectionSelect = document.getElementById('collectionname');
+                                collectionSelect.innerHTML = '<option value="" disabled selected>Select Collection</option>';
+        
+                                // Add fetched collections to the select box
+                                collections.forEach(collection => {
+                                    const option = document.createElement('option');
+                                    option.value = collection;
+                                    option.textContent = collection;
+                                    collectionSelect.appendChild(option);
+                                });
+                            })
+                            .catch(error => console.error('Error fetching collections:', error));
+        
+                        // Trigger the change event for the collectionname dropdown
+                        const event = new Event('change');
+                        collectionSelect.dispatchEvent(event);
+                    });
+        
+                          //yeh sirf check hai
+                   
+
+
+        // Event listener for yearSelect change
+        document.getElementById('yearSelect').addEventListener('change', function () {
+            const selectedYear = this.value;
+
+            // Fetch semesters based on the selected year
+            fetch(`/get_semesters?year=${selectedYear}`)
+                .then(response => response.json())
+                .then(semesters => {
+                    const semselect = document.getElementById('semselect');
+                    semselect.innerHTML = '<option value="" disabled selected>SEM</option>';
+
+                    // Add fetched semesters to the semselect dropdown
+                    semesters.forEach(semester => {
+                        const option = document.createElement('option');
+                        option.value = semester;
+                        option.textContent = semester;
+                        semselect.appendChild(option);
+                    });
+
+                    // Fetch subjects based on the selected year and semester (added this part)
+                    const selectedSemester = semselect.value;
+                    fetch(`/get_subjects?year=${selectedYear}&semester=${selectedSemester}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const subjectSelect = document.getElementById('subjectSelect');
+                            subjectSelect.innerHTML = '<option value="" disabled selected>Subject Name</option>';
+                            data.forEach(subject => {
+                                const option = document.createElement('option');
+                                option.value = subject;
+                                option.textContent = subject;
+                                subjectSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => console.error('Error fetching subjects:', error));
+                })
+                .catch(error => console.error('Error fetching semesters:', error));
+        });
+
+
+
+////////////////////////////////////
+
+
+
+            // Event listener for semselect change
+            document.getElementById('semselect').addEventListener('change', function () {
+                const selectedYear = document.getElementById('yearSelect').value;
+                const selectedSemester = this.value;
+
+                // Fetch subjects based on the selected year and semester
+                fetch(`/get_subjects?year=${selectedYear}&semester=${selectedSemester}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const subjectSelect = document.getElementById('subjectSelect');
+                        subjectSelect.innerHTML = '<option value="" disabled selected>Subject Name</option>';
+                        data.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject;
+                            option.textContent = subject;
+                            subjectSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching subjects:', error));
+            });
+
+
+
+
+
+                                // yah pe end
+                            });
+                        </script>
+                
+</head>
+<body>
+    <div class="container" style="border-radius: 1rem; border-style: solid; border-width: 0.3rem; border-color:black">
+        <div class="container">
+            <br>
+            <div class="row">
+                 <div class="container-fluid col-lg-9 col-md-9 col-sm-9">
+                    <div class="row border-bottom pb-3">
+                        <div class="col-sm-4">
+                            <input type="text" name="code" class="form-control" style="color:#146C94" placeholder="paper code">
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" style="color:#146C94" placeholder="Regulation">
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" style="color:#146C94" placeholder="H.T.No">
+                        </div>
+                    </div>
+                    <br>
+                    <select id="collegeNameSelect" class="form-control mt-4 p-0" style="color: #E21818; display:flex; flex-wrap: nowrap ">
+                        <option value="" disabled selected>Select College Name</option>
+                        <!-- Options will be dynamically added here using JavaScript -->
+                    </select>
+                   
+                    <br>
+                    <select id="statusselect" class="form-control" style="color:#146C94" align="center">
+                        <option value="" disabled selected>Select College Status</option>
+                        <option value="autonomous">(Autonomous)</option>
+                        <option value="not_autonomous">(Not Autonomous)</option>
+                    </select>
+                    <br>
+                    <div class="row border-bottom pb-3">
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" style="color:#146C94" placeholder="Type of Degree">
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" style="color:#146C94" placeholder="Type of Examination">
+                        </div>
+                    </div>
+                    <br>
+                    <select id="yearSelect" class="form-control" style="color:#146C94" align="center">
+                        <option value="">year</option>
+                        <!-- Options will be dynamically added here using JavaScript -->
+                    </select>
+                    
+                    <br>
+                    <select id="semselect" class="form-control" style="color:#146C94;" align="center">
+                        <option value="" selected>SEM</option>
+                        <!-- Options will be dynamically added here using JavaScript -->
+                    </select>
+                    <br>
+                    <select id="subjectSelect" class="form-control" style="color:#146C94;" align="center">
+                        <option value="" disabled selected>Subject Name</option>
+                        <!-- Options will be dynamically added here using JavaScript -->
+                    </select>
+                    
+                    <br>
+                    <select id="BranchNameSelect" class="form-control" style="color:#146C94; text-transform: uppercase;" align="center" >
+                        <option value="" disabled selected>Branch</option>
+                        <!-- Options will be dynamically added here using JavaScript -->
+                    </select>
+                    <br>
+                    <br>
+                    <!--line dalingee-->
+                    <div class="row border-bottom pb-3">
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" style="color:#146C94" placeholder="Time">
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" style="color:#146C94" placeholder="Marks">
+                        </div>
+                    </div>
+                    <!--abek dalingee-->
+                </div>
+                <br>
+                
+                
+                
+            </div>
+            
+            
+        </div>
+        <br>
+        <br>
+        <div class="row">
+			<div class="col-sm-12">
+				<h3>Instructions:</h3>
+				<ul>
+					<li>Answer all 5 questions from Part-A. Each question carries two marks</li>
+                    <li>Answer one full question from each unit in Part-B.Each full question carries 10 marks</li>
+				</ul>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" style="color:#146C94" placeholder="Optional-1 instruction">
+                </div>
+                <br>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" style="color:#146C94" placeholder="Optional-2 instruction">
+                </div>
+				<hr>
+			</div>
+		</div>
+        <h3 align="center">PART-A</h3>
+        <!---->
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" style="color:#146C94" placeholder="Marks for Questions">
+                </div>
+                <br>
+                <form action="" id="college-info-form">
+                    <div class="input_fields_wrap3">
+                        <!-- Existing content -->
+                        <li>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <select class="form-control dynamicCollectionname" id="collectionname" name="collectionname">
+                                        <!-- Options will be dynamically added here using JavaScript or manually -->
+                                    </select>
+                                </div>
+                                <div class="col-sm-9" id="documentListContainer">
+                                   <!--Move the label container outside of the row -->
+                                    <div id="documentList"></div>
+                                </div>
+                            </div>
+                        </li>
+                    </div>
+                    <br>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+       <!-- Yur HTML code here -->
+
+<!-- Your HTML code here -->
+
+    
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    // Declare collectionSelect variable outside event listeners
+    const collectionSelect = document.getElementById('collectionname');
+    
+    // Event listener for collectionname change
+    collectionSelect.addEventListener('change', function () {
+        const selectedCollection = this.value;
+        const selectedSubject = document.getElementById('subjectSelect').value;
+
+        // Fetch and display documents for the selected collection
+        fetchDocumentsAndDisplay(selectedCollection, selectedSubject);
+    });
+
+    // Event listener for subjectSelect change
+    document.getElementById('subjectSelect').addEventListener('change', function () {
+        const selectedSubject = this.value;
+
+        // Fetch collections based on the selected subject
+        fetch(`/get_collections?subject=${selectedSubject}`)
+            .then(response => response.json())
+            .then(collections => {
+                collectionSelect.innerHTML = '<option value="" disabled selected>Select Collection</option>';
+
+                // Add fetched collections to the select box
+                collections.forEach(collection => {
+                    const option = document.createElement('option');
+                    option.value = collection;
+                    option.textContent = collection;
+                    collectionSelect.appendChild(option);
+                });
+
+                // Trigger the change event for the collectionname dropdown
+                collectionSelect.dispatchEvent(new Event('change'));
+            })
+            .catch(error => console.error('Error fetching collections:', error));
+    });
+
+    // Call fetchDocumentsAndDisplay when the page loads
+    const initialSelectedCollection = collectionSelect.value;
+    const initialSelectedSubject = document.getElementById('subjectSelect').value;
+    fetchDocumentsAndDisplay(initialSelectedCollection, initialSelectedSubject);
+});
+
+// Function to fetch documents and display them as checkboxes
+function fetchDocumentsAndDisplay(selectedCollection, selectedSubject) {
+    const url = `/get_documents?subject=${selectedSubject}&collection=${selectedCollection}`;
+
+    fetch(url)
+    .then(response => response.json())
+    .then(responseData => {
+        const documents = responseData.documents;
+        console.log('Documents:', documents);
+        const documentList = document.getElementById('documentList');
+        documentList.innerHTML = '';
+
+        if (Array.isArray(documents)) {
+            documents.forEach((doc, index) => { // Adding index parameter
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'documents[]';
+                checkbox.value = index; // Assigning index as the value
+
+                const label = document.createElement('label');
+                label.textContent = doc;
+
+                const br = document.createElement('br');
+
+                documentList.appendChild(checkbox);
+                documentList.appendChild(label);
+                documentList.appendChild(br);
+            });
+        } else {
+            console.error('Documents is not an array:', documents);
+        }
+    })
+    .catch(error => console.error('Error fetching documents:', error));
+
+   }
+
+    </script>
+</body>
+</html>

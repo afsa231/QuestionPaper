@@ -1,0 +1,186 @@
+from flask import Flask, request, jsonify, render_template
+from pymongo import MongoClient
+
+app = Flask(__name__)
+client = MongoClient('mongodb://localhost:27017/')
+db = client['years']
+tagged_collection = db['tagged_databases']
+
+# Initialize tagged_databases set with existing data from the collection
+tagged_databases = set(tagged_collection.distinct('database'))
+
+@app.route('/')
+def home():
+    return render_template('paper.html')
+
+@app.route('/yearcollections')
+def get_collections():
+    collections = db.list_collection_names()
+    
+    # Exclude specific collection 'tagged_databases' from the list of collections
+    collections = [coll for coll in collections if coll != 'tagged_databases']
+    
+    return jsonify(collections)
+
+@app.route('/attachdatabases')
+def get_databases():
+    databases = client.list_database_names()
+    
+    # Exclude system databases and other MongoDB internal databases
+    available_databases = [db for db in databases if db != 'admin' and db != 'config' and db != 'local' and db != 'years' and db!='jabi']
+
+    # Exclude tagged databases from the list of available databases
+    available_databases = [db for db in available_databases if db not in tagged_databases]
+
+    return jsonify(available_databases)
+
+@app.route('/save-mapping', methods=['POST'])
+def save_mapping():
+    data = request.json
+    collection_name = data.get('collection')
+    selected_databases = data.get('databases')
+
+    try:
+        # Check if any selected database is already tagged
+        if any(db in tagged_databases for db in selected_databases):
+            return jsonify({'success': False, 'message': 'One or more selected databases are already tagged with a collection.'})
+
+        # Insert the mapping information as a document in the selected collection
+        selected_collection = db[collection_name]
+        mapping_data = {
+            'database': selected_databases,
+            'collection_name': collection_name
+        }
+        selected_collection.insert_one(mapping_data)
+
+        # Update the set of tagged databases
+        tagged_databases.update(selected_databases)
+
+        # Update the 'tagged_databases' collection with the new set of tagged databases
+        tagged_collection.replace_one({}, {'database': list(tagged_databases)}, upsert=True)
+
+        return jsonify({'success': True, 'message': 'Mapping saved successfully!'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+
+# Collage selection
+dbcol = client['collage']
+collagename_collection = dbcol['collagename']
+branchname_collection = dbcol['branchname']
+
+@app.route('/get_collagenames', methods=['GET'])
+def get_collagenames():
+    # Retrieve data from the MongoDB collection
+    collagenames = collagename_collection.distinct("data")  # Use the correct field name
+    
+    # Return the data as JSON
+    return jsonify(collagenames)
+
+@app.route('/get_branchnames', methods=['GET'])
+def get_branchnames():
+    branchnames = branchname_collection.distinct("data")
+    
+    return jsonify(branchnames)
+
+# Years
+@app.route('/get_years', methods=['GET'])
+def get_years():
+    # Retrieve data from the MongoDB "years" collection
+    years = db.list_collection_names()
+    
+    # Exclude specific collection 'tagged_databases' from the list of collections
+    years = [year for year in years if year != 'tagged_databases']
+    
+    return jsonify(years)
+
+
+
+@app.route('/get_collections', methods=['GET'])
+def gets():
+    selected_subject = request.args.get('subject')
+
+    # Check if the database exists for the selected subject
+    if selected_subject in client.list_database_names():
+        # Fetch collections from the selected database
+        collections = client[selected_subject].list_collection_names()
+        print(f"Selected Subject: {selected_subject}")
+        print(f"Collections: {collections}")
+        return jsonify(collections)
+    else:
+        print(f"No database found for the subject: {selected_subject}")
+        return jsonify([])
+    
+#semester
+@app.route('/get_semesters', methods=['GET'])
+def get_semesters():
+    selected_year = request.args.get('year')
+
+    # Fetch semesters from the selected collection (year)
+    semesters = db[selected_year].distinct("semester")  # Replace "semester" with the correct field name
+
+    # Return the data as JSON
+    return jsonify(semesters)
+
+@app.route('/get_subjects', methods=['GET'])
+def get_subjects():
+    # Get the selected year and semester from the request parameters
+    selected_year = request.args.get('year')
+    selected_semester = request.args.get('semester')
+
+    # Fetch documents from the selected collection (year and semester)
+    subjects = db[selected_year].find({"semester": selected_semester}, {"database": 1, "_id": 0})
+
+    # Extract the "database" field from each document
+    database_fields = [item for sublist in [subject.get("database", []) for subject in subjects] for item in sublist]
+
+    # Return the data as JSON
+    return jsonify(database_fields)
+
+import logging 
+# ...
+logging.basicConfig(level=logging.DEBUG)
+@app.route('/get_documents', methods=['GET'])
+def get_documents():
+    selected_subject = request.args.get('subject')
+    selected_collection = request.args.get('collection')
+
+    # Log debug information
+    logging.debug(f"Selected Subject: {selected_subject}")
+    logging.debug(f"Selected Collection: {selected_collection}")
+
+    try:
+        # Check if the selected subject (database) exists
+        if selected_subject not in client.list_database_names():
+            logging.error(f"Database not found for the subject: {selected_subject}")
+            return jsonify({'error': f"Database not found for the subject: {selected_subject}"})
+
+        # Check if the selected collection exists in the selected subject (database)
+        if selected_collection not in client[selected_subject].list_collection_names():
+            logging.error(f"Collection not found in the database: {selected_collection}")
+            return jsonify({'error': f"Collection not found in the database: {selected_collection}"})
+
+        # Fetch documents from the selected collection in the selected subject (database)
+        cursor = client[selected_subject][selected_collection].find({})
+
+        # Convert the cursor to a list of dictionaries
+        documents = list(cursor)
+
+        # Log debug information
+        logging.debug(f"Documents: {documents}")
+
+        # Extract the "data" field from each document
+        document_fields = [document.get("data", "") for document in documents]
+
+        # Log debug information
+        logging.debug(f"Documents Extracted: {document_fields}")
+
+        # Return the data as JSON
+        return jsonify(document_fields)
+    except Exception as e:
+        # Log the error
+        logging.error(f"Error fetching documents: {str(e)}")
+        return jsonify({'error': f"Error fetching documents: {str(e)}"})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

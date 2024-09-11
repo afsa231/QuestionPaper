@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <!-- Bootstrap CSS -->
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css"
+     integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+     crossorigin="anonymous">
+
+    <style>
+        .document {
+            display: block;
+        }
+
+        .document.active {
+            display: none;
+        }
+
+        @media print {
+            .btn-print {
+                display: none;
+            }
+            .document {
+                display: none !important;
+            }
+            .document.active {
+                display: block !important;
+            }
+        }
+        #container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* min-height: 100px; */
+        }
+    </style>
+</head>
+<body>
+
+{% for paper in papers %}
+<div class="document" id="document_{{ loop.index }}">
+    <div class="container" style="border-radius: 1rem; border-style: solid; border-width: 0.3rem; border-color:black; padding: 10px;">
+        <div id="container">
+            <div style="font-weight: bold; text-transform: uppercase;border: 1px solid black; padding: 8px; display: inline-block; margin: 12px; width: 300px; text-align: center;">CODE: {{paper.code}}</div>
+            <div style="font-weight: bold; text-transform: uppercase;border: 1px solid black; padding: 8px; display: inline-block; margin: 12px; width: auto;">{{paper.regulation}}</div>
+            <div style="font-weight: bold; text-transform: uppercase;border: 1px solid black; padding: 8px; display: inline-block; margin: 12px; width: 300px;">{{paper.rollno}}</div>
+        </div>
+        <h2><div style="font-weight: bold;text-transform: uppercase; display: flex; justify-content: center;">{{paper.colname}}</div></h2>
+        <div style="font-weight: bold;text-transform: uppercase; display: flex; justify-content: center;">{{paper.colstatus}}</div>
+        <h2><p style="font-weight: bold;text-transform: capitalize;display: flex;justify-content: center;">{{paper.tyofdg}}{{paper.yos}}&nbsp;{{paper.tyofexam}}&nbsp;{{paper.monyr}}</p></h2>
+        <p style="display: flex; justify-content: center; align-items: center;">Subject Name: <b style="text-transform: uppercase;">{{paper.subject}}</b></p>
+        <p style="display: flex; justify-content: center; align-items: center;">Branch: <b style="text-transform: uppercase;">{{paper.branch}}</b></p>
+        <div id="container">
+            <div style="font-weight: bold; display: inline-block; margin: 12px; width: 500px; text-align: center;">Time: {{paper.time}}</div>
+            <div style="font-weight: bold; display: inline-block; margin: 12px; width: 300px;">Max. Marks: {{paper.marks}}</div>
+        </div>
+        <div class="row" style="border-bottom: 2px solid black; padding-bottom: 3px;"></div>
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Instructions:</h3>
+                <ul>
+                    <li>Answer all 5 questions from Part-A. Each question carries two marks</li>
+                    <li>Answer one full question from each unit in Part-B.Each full question carries 10 marks</li>
+                </ul>
+                <div class="col-sm-10">{{paper.opins1}}</div>
+                <br>
+                <div class="col-sm-10">{{paper.op2ins}}</div>
+                <hr>
+            </div>
+        </div>
+        <h3 align="center">PART-A</h3>
+        <div class="col-sm-10">{{paper.romanmarks}}</div>
+        <div>
+            <ol>
+                {% for document in paper.selected_documents %}
+                    <li>{{ document }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+</div>
+<center><button onclick="printDocument({{ loop.index }})" class="btn btn-primary btn-print">Print</button></center>
+{% endfor %}
+
+<script>
+    function printDocument(index) {
+        var documents = document.getElementsByClassName('document');
+        for (var i = 0; i < documents.length; i++) {
+            documents[i].classList.remove('active');
+        }
+        documents[index - 1].classList.add('active');
+        window.print();
+        // Add refresh after printing
+        setTimeout(function() {
+            window.location.reload();
+        }, 1000); // Refresh after 1 second
+    }
+</script>
+
+</body>
+</html>
